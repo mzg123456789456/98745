@@ -4,7 +4,7 @@ import os
 import random
 
 # 目标URL
-url = 'https://raw.githubusercontent.com/mzg123456789456/p57gdv3j3n0vg334/refs/heads/main/f74bjd2h2ko99f3j5'
+url = 'https://80ip.152886.xyz/mzg123456789456/ip80/main/proxyip.txt'
 
 # 正则表达式用于匹配IP地址
 ip_pattern = r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}'
