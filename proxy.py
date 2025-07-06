@@ -1,7 +1,7 @@
 import requests
 import re
 import os
-import random
+import random  # 新增随机模块
 
 # 目标URL
 url = 'https://80ip.152886.xyz/mzg123456789456/ip80/main/proxyip.txt'
@@ -14,12 +14,14 @@ def clear_file(filename):
     if os.path.exists(filename):
         os.remove(filename)
 
-clear_file('iplist.txt')  # 清理 iplist.txt
+clear_file('jip.txt')  # 清理 jip.txt
+clear_file('kip.txt')  # 清理 kip.txt
+clear_file('sip.txt')  # 清理 sip.txt
 
 # 使用集合来存储符合条件的IP地址（自动去重）
 japan_ips = set()  # 存储 JP 相关的 IP
 korea_ips = set()  # 存储 KR 相关的 IP
-singapore_ips = set()  # 存储 SG 相关的 IP
+Singapore_ips = set()  # 存储 SG 相关的 IP
 
 # 发送HTTP请求获取内容
 response = requests.get(url)
@@ -30,7 +32,7 @@ ip_matches = re.finditer(ip_pattern, content)
 
 for match in ip_matches:
     ip = match.group()
-    # 获取IP前后的文本（用于检查是否包含443和JP/KR/SG）
+    # 获取IP前后的文本（用于检查是否包含443和JP/KR）
     start_pos = max(0, match.start() - 20)  # 往前取20个字符
     end_pos = min(len(content), match.end() + 20)  # 往后取20个字符
     context = content[start_pos:end_pos]
@@ -45,7 +47,7 @@ for match in ip_matches:
 
     # 检查是否包含443及SG（新加坡）
     if "443" in context and ("SG" in context or "sg" in context):
-        singapore_ips.add(ip)
+        Singapore_ips.add(ip)  # 修正为新加坡集合
 
 # 随机选择最多20个IP（如果可用）
 def get_random_sample(ip_set, sample_size=20):
@@ -56,22 +58,21 @@ def get_random_sample(ip_set, sample_size=20):
 # 获取随机样本
 japan_sample = get_random_sample(japan_ips)
 korea_sample = get_random_sample(korea_ips)
-singapore_sample = get_random_sample(singapore_ips)
+singapore_sample = get_random_sample(Singapore_ips)
 
-# 将符合条件的IP地址按照指定格式写入iplist.txt
-with open('iplist.txt', 'w') as file:
-    # 写入日本IP
-    for idx, ip in enumerate(japan_sample, 1):
-        file.write(f"{ip}:443#日本{idx}\n")
-    
-    # 写入韩国IP
-    for idx, ip in enumerate(korea_sample, 1):
-        file.write(f"{ip}:443#韩国{idx}\n")
-    
-    # 写入新加坡IP
-    for idx, ip in enumerate(singapore_sample, 1):
-        file.write(f"{ip}:443#新加坡{idx}\n")
+# 将符合条件的IP地址写入文件
+with open('jip.txt', 'w') as file:
+    for ip in japan_sample:
+        file.write(ip + '\n')
 
-print(f'共找到 {len(japan_ips)} 个符合条件的日本IP地址，随机选择 {len(japan_sample)} 个保存到iplist.txt')
-print(f'共找到 {len(korea_ips)} 个符合条件的韩国IP地址，随机选择 {len(korea_sample)} 个保存到iplist.txt')
-print(f'共找到 {len(singapore_ips)} 个符合条件的新加坡IP地址，随机选择 {len(singapore_sample)} 个保存到iplist.txt')
+with open('kip.txt', 'w') as file:
+    for ip in korea_sample:
+        file.write(ip + '\n')
+
+with open('sip.txt', 'w') as file:
+    for ip in singapore_sample:
+        file.write(ip + '\n')
+
+print(f'共找到 {len(japan_ips)} 个符合条件的日本IP地址，随机选择 {len(japan_sample)} 个保存到jip.txt')
+print(f'共找到 {len(korea_ips)} 个符合条件的韩国IP地址，随机选择 {len(korea_sample)} 个保存到kip.txt')
+print(f'共找到 {len(Singapore_ips)} 个符合条件的新加坡IP地址，随机选择 {len(singapore_sample)} 个保存到sip.txt')
