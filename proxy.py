@@ -1,55 +1,78 @@
 import requests
+import re
+import os
+import random  # 新增随机模块
 
-def fetch_and_filter_proxies():
-    url = "https://80ip.152886.xyz/mzg123456789456/ip80/main/proxyip.txt"
-    
-    try:
-        # 发送GET请求获取网页内容
-        response = requests.get(url)
-        response.raise_for_status()  # 检查请求是否成功
-        
-        # 按行分割内容
-        lines = response.text.split('\n')
-        
-        # 初始化三个列表来存储不同类别的IP
-        jp_ips = []
-        sg_ips = []
-        kr_ips = []
-        
-        # 遍历每一行
-        for line in lines:
-            line = line.strip()
-            if not line:
-                continue
-            
-            # 检查是否包含433
-            if ':433' in line:
-                # 检查是否包含JP
-                if 'JP' in line:
-                    jp_ips.append(line)
-                # 检查是否包含SG
-                elif 'SG' in line:
-                    sg_ips.append(line)
-                # 检查是否包含KR
-                elif 'KR' in line:
-                    kr_ips.append(line)
-        
-        # 将结果写入不同的文件
-        with open('jip.txt', 'w') as f:
-            f.write('\n'.join(jp_ips))
-        
-        with open('sip.txt', 'w') as f:
-            f.write('\n'.join(sg_ips))
-        
-        with open('kip.txt', 'w') as f:
-            f.write('\n'.join(kr_ips))
-        
-        print("代理IP已成功提取并保存到相应文件！")
-        
-    except requests.exceptions.RequestException as e:
-        print(f"请求出错: {e}")
-    except Exception as e:
-        print(f"发生错误: {e}")
+# 目标URL
+url = 'https://80ip.152886.xyz/mzg123456789456/ip80/main/proxyip.txt'
 
-if __name__ == "__main__":
-    fetch_and_filter_proxies()
+# 正则表达式用于匹配IP地址
+ip_pattern = r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}'
+
+# 检查文件是否存在，如果存在则删除
+def clear_file(filename):
+    if os.path.exists(filename):
+        os.remove(filename)
+
+clear_file('jip.txt')  # 清理 jip.txt
+clear_file('kip.txt')  # 清理 kip.txt
+clear_file('sip.txt')  # 清理 sip.txt
+
+# 使用集合来存储符合条件的IP地址（自动去重）
+japan_ips = set()  # 存储 JP 相关的 IP
+korea_ips = set()  # 存储 KR 相关的 IP
+Singapore_ips = set()  # 存储 SG 相关的 IP
+
+# 发送HTTP请求获取内容
+response = requests.get(url)
+content = response.text
+
+# 查找所有IP地址及其上下文
+ip_matches = re.finditer(ip_pattern, content)
+
+for match in ip_matches:
+    ip = match.group()
+    # 获取IP前后的文本（用于检查是否包含443和JP/KR）
+    start_pos = max(0, match.start() - 20)  # 往前取20个字符
+    end_pos = min(len(content), match.end() + 20)  # 往后取20个字符
+    context = content[start_pos:end_pos]
+
+    # 检查是否包含443及JP（日本）
+    if "443" in context and ("JP" in context or "jp" in context):
+        japan_ips.add(ip)
+
+    # 检查是否包含443及KR（韩国）
+    if "443" in context and ("KR" in context or "kr" in context):
+        korea_ips.add(ip)
+
+    # 检查是否包含443及SG（新加坡）
+    if "443" in context and ("SG" in context or "sg" in context):
+        Singapore_ips.add(ip)  # 修正为新加坡集合
+
+# 随机选择最多20个IP（如果可用）
+def get_random_sample(ip_set, sample_size=20):
+    if len(ip_set) <= sample_size:
+        return list(ip_set)
+    return random.sample(list(ip_set), sample_size)
+
+# 获取随机样本
+japan_sample = get_random_sample(japan_ips)
+korea_sample = get_random_sample(korea_ips)
+singapore_sample = get_random_sample(Singapore_ips)
+
+# 将符合条件的IP地址写入文件
+with open('jip.txt', 'w') as file:
+    for ip in japan_sample:
+        file.write(ip + '\n')
+
+with open('kip.txt', 'w') as file:
+    for ip in korea_sample:
+        file.write(ip + '\n')
+
+with open('sip.txt', 'w') as file:
+    for ip in singapore_sample:
+        file.write(ip + '\n')
+
+print(f'共找到 {len(japan_ips)} 个符合条件的日本IP地址，随机选择 {len(japan_sample)} 个保存到jip.txt')
+print(f'共找到 {len(korea_ips)} 个符合条件的韩国IP地址，随机选择 {len(korea_sample)} 个保存到kip.txt')
+print(f'共找到 {len(Singapore_ips)} 个符合条件的新加坡IP地址，随机选择 {len(singapore_sample)} 个保存到sip.txt')
