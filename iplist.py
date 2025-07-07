@@ -34,19 +34,26 @@ with open('ipt.txt', 'w', encoding='utf-8') as output_file:
             response = requests.get(url)
             response.raise_for_status()
             content = response.text
+
+            # 查找所有IP地址并去重
+            ip_matches = re.findall(ip_pattern, content)
+            country = country_map[file_type]
             
-            # 查找IP地址
-            ip_match = re.search(ip_pattern, content)
-            if ip_match:
-                ip = ip_match.group()
-                country = country_map[file_type]
+            if ip_matches:
+                # 使用集合去重并保持原始顺序
+                unique_ips = []
+                seen = set()
+                for ip in ip_matches:
+                    if ip not in seen:
+                        seen.add(ip)
+                        unique_ips.append(ip)
                 
-                # 写入3个格式化IP，每行一个
-                for i in range(1, 10):
-                    formatted_ip = f"{ip}:443#{country}{i}"
+                print(f'在 {url} 中找到 {len(ip_matches)} 个IP，去重后剩余 {len(unique_ips)} 个')
+                
+                # 为每个IP生成唯一记录
+                for idx, ip in enumerate(unique_ips, 1):
+                    formatted_ip = f"{ip}:443#{country}{idx}"
                     output_file.write(formatted_ip + '\n')
-                
-                print(f'成功处理 {country} IP: {ip}')
             else:
                 print(f'未找到IP地址在 {url}')
         except Exception as e:
