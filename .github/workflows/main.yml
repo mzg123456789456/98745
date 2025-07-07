@@ -2,18 +2,22 @@ name: Proxy Updater
 
 on:
   schedule:
-    # 每2天在UTC时间00:00运行一次
     - cron: '0 0 */2 * *'
-  workflow_dispatch: # 允许手动触发
+  workflow_dispatch:
 
 jobs:
   update-proxies:
     runs-on: ubuntu-latest
     
+    permissions:  # 添加这部分权限设置
+      contents: write  # 授予写入权限
+    
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
-      
+      with:
+        fetch-depth: 0  # 获取所有历史记录
+        
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
