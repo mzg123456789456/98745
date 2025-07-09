@@ -8,11 +8,15 @@ on:
 jobs:
   update_ips:
     runs-on: ubuntu-latest
+    permissions:  # 关键权限设置
+      contents: write  # 授予写入权限
+    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          persist-credentials: true  # 关键：允许后续 git push
+          token: ${{ secrets.GITHUB_TOKEN }}  # 显式使用GITHUB_TOKEN
+          fetch-depth: 0  # 获取完整历史记录
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -27,8 +31,15 @@ jobs:
 
       - name: Commit and push changes
         run: |
+          # 配置Git
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
+          
+          # 添加并提交更改
           git add cfip.txt
-          git commit -m "Auto-update IP list"
-          git push
+          git commit -m "Auto-update IP list [skip ci]"
+          
+          # 强制推送更新
+          git push origin HEAD:main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # 确保使用token
