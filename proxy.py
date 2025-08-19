@@ -4,7 +4,7 @@ import os
 import random  # 新增随机模块
 
 # 目标URL
-url = 'https://80ip.152886.xyz/mzg123456789456/ip80/main/ipproxy.txt'
+#url = ''
 
 # 正则表达式用于匹配IP地址
 ip_pattern = r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}'
