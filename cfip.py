@@ -17,7 +17,7 @@ def extract_ips_from_webpage(url):
         ips = ip_pattern.findall(soup.get_text())
         
         # 只取前100个IP
-        return ips[:100]
+        return ips[:20]
     except Exception as e:
         print(f"Error fetching or parsing webpage: {e}")
         return []
@@ -30,7 +30,7 @@ def save_ips_to_file(ips, output_file='cfip.txt'):  # 修改默认输出文件�
 
 if __name__ == "__main__":
     # 替换为你要提取IP的网页URL
-    #webpage_url = ""  # 请替换为实际的URL
+    webpage_url = "https://80ip.152886.xyz/mzg123456789456/ip80/main/cfipv4.txt"  # 请替换为实际的URL
     
     ips = extract_ips_from_webpage(webpage_url)
     if ips:
